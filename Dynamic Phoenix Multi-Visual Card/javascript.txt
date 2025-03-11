@@ -1,0 +1,176 @@
+// Step 1. Select your data from the link in the bottom left corner
+
+// Step 2. Style your chart using the following properties
+//--------------------------------------------------
+// Properties
+//--------------------------------------------------
+
+var sortOnTotals = 'Default'; //'None', 'Ascending', 'Descending', 'A-Z', 'Z-A'
+var dataLabelText = ''; //'%_VALUE'
+var xAxisTitle = 'Department';
+var yAxisTitle = 'Revenue';
+var chartMargin = 20; // space to leave around chart (in pixels)
+
+//--------------------------------------------------
+// Data Column Names and Settings
+//--------------------------------------------------
+
+var dataXAxisColumnName = 'xAxis';
+var dataSeriesColumnName = 'Series';
+var dataYAxisColumnName = 'yAxis';
+var GraphSeperatorField = 'state'; // <-- Field name used to build distinct charts. Must not contain spaces.
+
+var NumberOfMaxChartsToCreate = 52; // Maximum number of charts to create
+
+//--------------------------------------------------
+// For ultimate flexibility, modify the code below!
+//--------------------------------------------------
+
+// Available globals
+var domo = window.domo;
+var datasets = window.datasets;
+var DomoPhoenix = window.DomoPhoenix;
+var chartContainer = document.getElementById('myDiv');
+
+// Form the data query
+var fields = [dataXAxisColumnName, dataSeriesColumnName, dataYAxisColumnName, GraphSeperatorField];
+var groupby = [dataXAxisColumnName, dataSeriesColumnName, GraphSeperatorField];
+var query = `/data/v1/${datasets[0]}?fields=${fields.join()}&groupby=${groupby.join()}`;
+
+// Set a chart type
+var chartType = DomoPhoenix.CHART_TYPE.STACKED_BAR;
+var domoData;
+
+// Fetch data and create charts
+domo.get(query).then(function(data) {
+  domoData = data;
+  createChartContainers(data);
+}).catch(function(error) {
+  console.error('Error fetching data:', error);
+});
+
+var chart = null;
+function createChart(containerId, chartData, chartTitle) {
+  var columns = [
+    {
+      type: DomoPhoenix.DATA_TYPE.STRING,
+      name: dataXAxisColumnName,
+      mapping: DomoPhoenix.MAPPING.ITEM,
+    },
+    {
+      type: DomoPhoenix.DATA_TYPE.STRING,
+      name: dataSeriesColumnName,
+      mapping: DomoPhoenix.MAPPING.SERIES,
+    },
+    {
+      type: DomoPhoenix.DATA_TYPE.DOUBLE,
+      name: dataYAxisColumnName,
+      mapping: DomoPhoenix.MAPPING.VALUE,
+    },
+  ];
+
+  var propertyOverrides = {
+    font_size: 'Larger',
+    total_sort: sortOnTotals,
+    datalabel_text: dataLabelText && dataLabelText.length ? dataLabelText : undefined,
+    title_x: xAxisTitle && xAxisTitle.length ? xAxisTitle : undefined,
+    title_y: yAxisTitle && yAxisTitle.length ? yAxisTitle : undefined,
+    legend_position: 'right',  // Move the legend to the right side
+    legend_font_size: 'Small', // Reduce the legend font size
+    legend_width: 100          // Adjust the legend width to minimize space usage
+  };
+
+  // Set fixed sizes for the chart
+  var options = {
+    width: 600,  // Adjust width as needed
+    height: 400, // Adjust height as needed
+    properties: propertyOverrides,
+  };
+
+  var phoenixData = { columns: columns, rows: chartData };
+  chart = new DomoPhoenix.Chart(chartType, phoenixData, options);
+
+  var container = document.getElementById(containerId);
+  
+  // Create a title element
+  var titleElement = document.createElement('h3');
+  titleElement.textContent = chartTitle;
+  titleElement.style.textAlign = 'center';
+  
+  // Insert the title element before the chart canvas
+  container.appendChild(titleElement);
+  container.appendChild(chart.canvas);
+  chart.render();
+
+  return chart;
+}
+
+function createChartContainers(data) {
+  var groupedData = data.reduce((acc, row) => {
+    let key = row[GraphSeperatorField]; // Use bracket notation for field names with spaces
+
+    // Skip creating a chart if the GraphSeperatorField is blank or null
+    if (key == null || key.trim() === '') {
+      return acc;
+    }
+
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(row);
+    return acc;
+  }, {});
+
+  var container = document.getElementById('myDiv');
+  var chartCounter = 0;
+
+  for (var key in groupedData) {
+    if (chartCounter % 4 === 0) {
+      var row = document.createElement('div');
+      row.className = 'chart-row';
+      container.appendChild(row);
+    }
+
+    var chartContainer = document.createElement('div');
+    chartContainer.className = 'chart-container';
+    chartContainer.id = `chartContainer${chartCounter}`;
+    row.appendChild(chartContainer);
+
+    // Pass the distinct value as the chart title
+    createChart(chartContainer.id, groupedData[key], key);
+
+    chartCounter++;
+    if (chartCounter >= NumberOfMaxChartsToCreate) break; // Use the variable to limit charts
+  }
+}
+
+var style = document.createElement('style');
+style.innerHTML = `
+.chart-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 40px; /* Increase the space between each row */
+}
+
+.chart-container {
+  flex: 1 1 calc(50% - 10px); /* Adjust flex basis to accommodate larger charts */
+  margin: 5px;
+  min-width: 300px;
+  min-height: 400px;
+  border: 2px solid black; /* Add a black border around each graph */
+}
+
+.chart-container h3 {
+  margin: 0;
+  padding: 5px;
+  text-align: center;
+}
+`;
+document.head.appendChild(style);
+
+function getChartSize() {
+  return {
+    width: 600,
+    height: 400,
+  };
+}
