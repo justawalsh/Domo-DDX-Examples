@@ -1,0 +1,471 @@
+var dataObject = [
+  {
+    id: 'Field_1',
+    label: 'Field 1',
+    type: 'text',
+  },
+  {
+    id: 'Field_2',
+    label: 'Field 2',
+    type: 'text',
+  },
+  {
+    id: 'Field_3',
+    label: 'Field 3',
+    type: 'text',
+  },
+  {
+    id: 'Field_4',
+    label: 'Field 4',
+    type: 'text',
+  },
+  {
+    id: 'Field_5',
+    label: 'Field 5',
+    type: 'text',
+  },
+  {
+    id: 'Field_6',
+    label: 'Field 6',
+    type: 'text',
+  },
+  {
+    id: 'Field_7',
+    label: 'Field 7',
+    type: 'text',
+  },
+  {
+    id: 'Field_8',
+    label: 'Field 8',
+    type: 'text',
+  },
+  {
+    id: 'Field_9',
+    label: 'Field 9',
+    type: 'text',
+  },
+  {
+    id: 'Field_10',
+    label: 'Field 10',
+    type: 'text',
+  },
+  {
+    id: 'Field_11',
+    label: 'Field 11',
+    type: 'text',
+  },
+  {
+    id: 'Field_12',
+    label: 'Field 12',
+    type: 'text',
+  }
+];
+
+var addButtonLabel = 'Add Row';
+var exportButtonLabel = 'Export as CSV';
+var actionColumnTitle = 'Actions';
+
+// Set "syncToDataset" to true if you would like the data to be synced to a Domo dataset
+var syncToDataset = true;
+
+//---------------------------------------------------
+// For ultimate flexibility, modify the code below!
+//---------------------------------------------------
+
+//Available globals
+var domo = window.domo;
+var datasets = window.datasets;
+var $ = window.jQuery;
+var myDiv = document.getElementById('myDiv');
+
+// Setup collection service
+var collectionName = 'form_data';
+var collectionService = new CollectionService(collectionName, dataObject, syncToDataset);
+
+// Link JavaScript to the HTML elements
+var table = document.getElementById('tableList');
+var tableList = new TableList(table, dataObject, collectionService);
+
+var searchContainer = document.getElementById('searchContainer');
+var searchBox = new Search(searchContainer, collectionService, {
+  onSearch: function(res){ tableList.build(res) },
+});
+
+var addButton = document.getElementById('addButton');
+addButton.innerText = addButtonLabel;
+addButton.onclick = function(){
+  addBlankRow();
+};
+
+var exportButton = document.getElementById('exportButton');
+exportButton.innerText = exportButtonLabel;
+exportButton.onclick = function(){
+  ExportData(dataObject, collectionService);
+};
+
+var syncButton = document.getElementById('syncButton');
+syncButton.innerText = 'Sync Now';
+syncButton.style.display = 'inline-block';
+syncButton.disabled = false;
+syncButton.onclick = function(){
+  runSync();
+};
+
+table.classList.add('isOwner');
+
+$(document).ready(function(){
+  tableList.load();
+
+  // Add DataTable settings for scrolling with frozen headers
+  $('#tableList').DataTable({
+    paging: false,
+    scrollCollapse: true,
+    scrollY: '200px', // You can adjust the height as needed
+  });
+});
+
+// Function to add a blank row to the table
+function addBlankRow(){
+  var blankRow = {};
+  dataObject.forEach(function(col){
+    blankRow[col.id] = ''; // Initialize each column with an empty string
+  });
+  collectionService.add(blankRow).then(function(res) {
+    tableList.addRow(res);
+  });
+}
+
+// Function to manage the table list with editable cells
+function TableList(tableEl, dataObj, collectionService){
+  var $table, dataKeys;
+
+  function constructor(){
+    $table = $(tableEl);
+    dataKeys = dataObj.map(function(col){ return col.id });
+    buildTableStructure();
+  }
+
+  function showLoading(flag = true){
+    if(flag){
+      $table.addClass('loading');
+      return;
+    }
+
+    $table.removeClass('loading');
+    return;
+  }
+
+  function buildTableStructure() {
+    $table.append('<thead><tr class="group-row"></tr><tr class="header-row"></tr></thead><tbody></tbody>');
+    var $groupRow = $table.find('.group-row');
+    var $headerRow = $table.find('.header-row');
+
+    // First row for grouped headers (quarters)
+    $groupRow.append(`<th rowspan="2" scope="col">Field 1</th>`);
+    $groupRow.append(`<th rowspan="2" scope="col">Field 2</th>`);
+    $groupRow.append(`<th rowspan="2" scope="col">Field 3</th>`);
+    $groupRow.append(`<th rowspan="2" scope="col">Field 4</th>`);
+
+    // Group headers for each quarter with 4 columns (US and CA for both allocated and approved)
+    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Q1</th>`);
+    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Q2</th>`);
+    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Q3</th>`);
+    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Q4</th>`);
+
+    // Second row for individual countries (US and CA) under each quarter
+    // Q1 Fields
+    $headerRow.append(`<th scope="col" data-field="Field_5">Field 5 (Allocated)</th>`);
+    $headerRow.append(`<th scope="col" data-field="Field_6">Field 6 (Approved)</th>`);
+    
+    // Q2 Fields
+    $headerRow.append(`<th scope="col" data-field="Field_7">Field 7 (Allocated)</th>`);
+    $headerRow.append(`<th scope="col" data-field="Field_8">Field 8 (Approved)</th>`);
+    
+    // Q3 Fields
+    $headerRow.append(`<th scope="col" data-field="Field_9">Field 9 (Allocated)</th>`);
+    $headerRow.append(`<th scope="col" data-field="Field_10">Field 10 (Approved)</th>`);
+    
+    // Q4 Fields
+    $headerRow.append(`<th scope="col" data-field="Field_11">Field 11 (Allocated)</th>`);
+    $headerRow.append(`<th scope="col" data-field="Field_12">Field 12 (Approved)</th>`);
+  }
+
+  function buildTableBody(docs){
+    $table.find('tbody').empty();
+    docs.forEach(function(doc){ addRow(doc) });
+    showLoading(false);
+  }
+
+  function loadTable(){
+    collectionService.getAll().then(buildTableBody);
+  }
+
+  function addRow(document){
+    var $row = $('<tr></tr>');
+    $row.data('id', document.id);
+
+    var data = document.content;
+    dataKeys.forEach(function(key) {
+      var value = (data[key] !== undefined) ? makeSafeText(data[key]) : '';
+      var $cell = $('<td></td>').html(value).attr('contenteditable', true);
+      
+      // Handle saving data when editing is done
+      $cell.on('blur', function() {
+        var newValue = $(this).text();
+        data[key] = (newValue !== '' && dataObject.find(col => col.id === key).type === 'number') ? parseFloat(newValue) : newValue;
+        collectionService.update(document.id, data); // Save updated data
+      });
+
+      $row.append($cell);
+    });
+
+    $table.find('tbody').append($row);
+  }
+
+  constructor();
+  return {
+    load: loadTable,
+    addRow: addRow,
+    build: buildTableBody,
+    showLoading: showLoading,
+  };
+}
+
+// Search Input Function
+function Search(containerEl, collectionService, opts){
+  var searchDelay = 300;
+  var searchTimer = null;
+  var $searchField, $clearBtn;
+
+  function constructor(){
+    $searchField = $(containerEl).find('input');
+    $clearBtn = $(containerEl).find('button');
+
+    $searchField.on('keyup', onKeyUp);
+    $clearBtn.on('click', clearSearch);
+  }
+
+  function onKeyUp(ev){
+    var value = makeSafeText(ev.target.value);
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function(){
+      search(value);
+    }, searchDelay)
+  }
+
+  function search(value){
+    clearTimeout(searchTimer);
+    if(typeof opts.onSearch === 'function'){
+      var res = collectionService.searchCache(value);
+      opts.onSearch(res);
+    }
+  }
+
+  function clearSearch(){
+    $searchField.val('').focus();
+    search('');
+  }
+
+  constructor();
+  return {
+    clear: clearSearch,
+    search: search,
+  };
+}
+
+// Collection Service Function
+function CollectionService(collection, columnsObject, syncToDataset){
+  var collectionName = collection;
+  var collectionInfoPromise = null;
+  var cache = null;
+
+  syncSchema(columnsObject);
+
+  function syncSchema(columns){
+    var requestedSchema = cleanUpSchema(columnsObjectToSchema(columnsObject));
+    return getCollectionInfo().then(function(info){
+      var currentColumns = info && info.schema && info.schema.columns;
+      var requestedColumns = requestedSchema && requestedSchema.columns;
+      var schemaIsSame = (
+        info.syncEnabled === syncToDataset && (
+          currentColumns && requestedColumns &&
+          currentColumns.length && requestedColumns.length && currentColumns.length === requestedColumns.length &&
+          !requestedColumns.some(function(column){
+            var index = currentColumns.findIndex(function(col){ return col.name === column.name; });
+            return index === -1 || column.type !== currentColumns[index].type;
+          })
+        )
+      );
+      if(!schemaIsSame){
+        return updateCollection(requestedSchema, syncToDataset);
+      }
+      return schemaIsSame;
+    })
+  }
+
+  function columnsObjectToSchema(obj) {
+    return {
+      columns: obj.map(function(column){
+        return {
+          type: getColumnType(column.type),
+          name: column.id,
+          visible: true,
+        }
+      })
+    };
+  }
+
+  function getColumnType(type){
+    switch(type.toUpperCase && type.toUpperCase()){
+      case 'TEXT':
+        return 'STRING';
+      case 'NUMBER':
+        return 'DOUBLE';
+      case 'STRING':
+      case 'LONG':
+      case 'DECIMAL':
+      case 'DOUBLE':
+      case 'DATE':
+      case 'DATETIME':
+        return type.toUpperCase();
+      default:
+        return 'STRING';
+    }
+  };
+
+  function search(query){
+    return domo.post(`/domo/datastores/v1/collections/${collectionName}/documents/query`, query);
+  }
+
+  function searchCache(value){
+    return cache.filter(doc => 
+      doc.content && Object.keys(doc.content).some(key =>
+        doc.content[key].toString().toLowerCase().indexOf(value.toLowerCase()) >= 0
+      )
+    )
+  }
+
+  function getCollectionInfo(){
+    if(collectionInfoPromise == null){
+      collectionInfoPromise = domo.get(`/domo/datastores/v1/collections/${collectionName}`)
+    }
+    return collectionInfoPromise;
+  }
+
+  function updateCollection(schema, syncEnabled){
+    return getCollectionInfo().then(function(info) {
+      return domo.put(`/domo/datastores/v1/collections/${collectionName}`, {
+        schema: cleanUpSchema(schema),
+        syncEnabled: syncEnabled != null ? syncEnabled : info.syncEnabled,
+      });
+    });
+  }
+
+  function cleanUpSchema(schema) {
+    return Object.assign({}, schema, {
+      columns: schema.columns && schema.columns.map(col => ({
+        name: col.name || col.label,
+        type: getColumnType(col.type),
+      }))
+    });
+  }
+
+  function runSync(){
+    // Fetch all the data first
+    collectionService.getAll().then(function (data) {
+        // Filter out rows where all fields are null or blank
+        const validData = data.filter(doc => !isRowEmpty(doc.content));
+        
+        // Sync only the valid data
+        if (validData.length > 0) {
+            domo.post(`/domo/datastores/v1/export`, validData)
+                .then(res => {
+                    var Status = {
+                        STARTED: 200,
+                        IN_PROGRESS: 423,
+                    };
+                    if (res.status === Status.STARTED || res.status === Status.IN_PROGRESS) {
+                        console.log("Sync started successfully.");
+                    }
+                });
+        } else {
+            console.log("No valid data to sync.");
+        }
+    });
+  }
+
+  // Function to check if a row is completely empty
+  function isRowEmpty(row) {
+      return Object.keys(row).every(key => row[key] === null || row[key].trim() === '');
+  }
+
+  function getAll(){
+    return domo.get(`/domo/datastores/v1/collections/${collectionName}/documents`)
+      .then(res => cache = res);
+  }
+
+  function get(documentId){
+    return domo.get(`/domo/datastores/v1/collections/${collectionName}/documents/${documentId}`);
+  }
+
+  function getFromCache(documentId){
+    return cache.find(doc => doc.id === documentId);
+  }
+
+  function update(documentId, content){
+    return domo.put(`/domo/datastores/v1/collections/${collectionName}/documents/${documentId}`, { content: content })
+      .then(res => {
+        var index = cache.findIndex(doc => doc.id === documentId);
+        cache.splice(index, 1, res);
+        return res;
+      });
+  }
+
+  function add(content){
+    return domo.post(`/domo/datastores/v1/collections/${collectionName}/documents/`, { content: content })
+      .then(res => {
+        cache.push(res);
+        return res;
+      });
+  }
+
+  function remove(documentId){
+    return domo.delete(`/domo/datastores/v1/collections/${collectionName}/documents/${documentId}`).then(res => {
+      var index = cache.findIndex(doc => doc.id === documentId);
+      cache.splice(index, 1);
+    });
+  }
+
+  return {
+    add: add,
+    get: get,
+    getAll: getAll,
+    getCollectionInfo: getCollectionInfo,
+    updateCollection: updateCollection,
+    getFromCache: getFromCache,
+    remove: remove,
+    runSync: runSync,
+    search: search,
+    searchCache: searchCache,
+    update: update,
+  };
+}
+
+// Utility functions
+
+function makeSafeText(text){
+  return String(text)
+    .replace(/&[/s]+/g, '&amp; ')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function decodeSafeText(text){
+  var div = document.createElement('div');
+  div.innerHTML = makeSafeText(text);
+  return div.innerText;
+}
+
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+}
