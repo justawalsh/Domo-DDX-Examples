@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domo Charts</title>
+</head>
+<body>
+
+<div id="myDiv"></div>
+
+<!-- Include the Domo Phoenix library -->
+<script src="https://cdn.jsdelivr.net/npm/@domoinc/domo-phoenix@0.17.0/build/global/domoPhoenix.js" 
+        integrity="sha256-APMIhb9qxeiI9OnOJHNzV3s8TG2nu1FUDPtL5c91PHI=" 
+        crossorigin="anonymous"></script>
+
+</body>
+</html>
