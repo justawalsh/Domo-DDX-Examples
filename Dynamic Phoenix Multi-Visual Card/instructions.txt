@@ -1,3 +1,5 @@
+Dynamic Phoenix Multi-Visual Card - This will build a series of graphs based on GraphSeperatorField distinct values
+
 Step 1:
 Install DDX brick form appstore in Domo https://{domain}domo.com/appstore/details/3CB7F565D496C66CC6AA75AB1810C212E94E39191C42D01CCECE9CB94F63D79F
 Step 2:
