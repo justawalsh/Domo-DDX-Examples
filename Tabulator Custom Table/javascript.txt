@@ -1,0 +1,136 @@
+//Code template for simple copy and paste. Each feature is outlined in code.
+// DDX Bricks Wiki - See https://developer.domo.com/docs/ddx-bricks/getting-started-using-ddx-bricks
+// for tips on getting started, linking to Domo data and debugging your app
+ 
+//Available globals
+var domo = window.domo; // For more on domo.js: https://developer.domo.com/docs/dev-studio-guides/domo-js#domo.get
+var datasets = window.datasets;
+
+//Step 1. Select your dataset(s) . dataset0 will be the default alias but you can choose other datasets and alias via the dataset dropdown and select dataset options.
+//Current dataset alias is dataset0 and selected dataset is "EXAMPLE SALES DATA"
+
+
+//Step 2. Query your dataset(s): https://developer.domo.com/docs/dev-studio-references/data-api
+var fields = []; // keeping empty requests all fields
+var groupby = []; // keeping empty to not use groupby
+var query = `/data/v1/${datasets[0]}?fields=${fields.join()}&groupby=${groupby.join()}`;
+domo.get(query).then(handleResult);
+
+//set up max filters for header filters
+//custom max min header filter for header filters
+var minMaxFilterEditor = function(cell, onRendered, success, cancel, editorParams){
+
+    var end;
+
+    var container = document.createElement("span");
+
+    //create and style inputs
+    var start = document.createElement("input");
+    start.setAttribute("type", "number");
+    start.setAttribute("placeholder", "Min");
+    start.setAttribute("min", 0);
+    start.setAttribute("max", 100);
+    start.style.padding = "4px";
+    start.style.width = "50%";
+    start.style.boxSizing = "border-box";
+
+    start.value = cell.getValue();
+
+    function buildValues(){
+        success({
+            start:start.value,
+            end:end.value,
+        });
+    }
+
+    function keypress(e){
+        if(e.keyCode == 13){
+            buildValues();
+        }
+
+        if(e.keyCode == 27){
+            cancel();
+        }
+    }
+
+    end = start.cloneNode();
+    end.setAttribute("placeholder", "Max");
+
+    start.addEventListener("change", buildValues);
+    start.addEventListener("blur", buildValues);
+    start.addEventListener("keydown", keypress);
+
+    end.addEventListener("change", buildValues);
+    end.addEventListener("blur", buildValues);
+    end.addEventListener("keydown", keypress);
+
+
+    container.appendChild(start);
+    container.appendChild(end);
+
+    return container;
+ }
+
+//custom max min filter function
+function minMaxFilterFunction(headerValue, rowValue, rowData, filterParams){
+    //headerValue - the value of the header filter element
+    //rowValue - the value of the column in this row
+    //rowData - the data for the row being filtered
+    //filterParams - params object passed to the headerFilterFuncParams property
+
+        if(rowValue){
+            if(headerValue.start != ""){
+                if(headerValue.end != ""){
+                    return rowValue >= headerValue.start && rowValue <= headerValue.end;
+                }else{
+                    return rowValue >= headerValue.start;
+                }
+            }else{
+                if(headerValue.end != ""){
+                    return rowValue <= headerValue.end;
+                }
+            }
+        }
+
+    return true; //must return a boolean, true if it passes the filter.
+}
+
+//Step 3. Do something with the data from the query result
+function handleResult(data){
+  console && console.log(data);
+var table = new Tabulator("#tabulator-table", {
+      data:data,
+      autoColumns:true, // This can be removed and code to call specific column info inserted.
+      autoColumnsDefinitions: function(definitions) {
+        //definitions - array of column definition objects
+          definitions.forEach((column) => {
+              column.headerFilter = true; // add header text filter to every column. 
+              column.formatter = "input";
+          });
+          return definitions;
+       },
+      clipboard:true, //set to false to disable ctrl+C. Review here https://tabulator.info/examples/6.2#clipboard
+
+      movableColumns:true, //set to false if you want static column placement. 
+      layout:"fitDataTable", //Can be set to fitDataTable, fitDataStretch, fitDataFill, fitColumns. Review https://tabulator.info/examples/6.2
+      //frozenRows:1, set to freeze top level row of data or increase for additional rows. Review here https://tabulator.info/examples/6.2#frozen-row
+      //For frozen columns, review https://tabulator.info/examples/6.2#frozen-col
+
+      //Options to implement data trees start here. Review https://tabulator.info/examples/6.2#tree
+      //data:tableDataNested,
+      //dataTree:true,
+      //dataTreeStartExpanded:true,
+      //Options to implement data trees end here.
+
+      pagination:"local",
+      paginationSize:10, //Atler to set default pagination row size
+      paginationSizeSelector:[10, 25, 50, 100], //Alter to set pagination size options
+  });
+  //trigger download of data.csv file on button press
+document.getElementById("download-csv").addEventListener("click", function(){
+    table.download("csv", "data.csv");
+});
+//trigger download of data.xlsx file on button press
+document.getElementById("download-xlsx").addEventListener("click", function(){
+    table.download("xlsx", "data.xlsx", {sheetName:"My Data"});
+});}
