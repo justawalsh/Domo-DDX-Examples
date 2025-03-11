@@ -1,0 +1,8 @@
+<link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+<div id="tabulator-table"></div> <! -- must match table name in javascript in the "//Step 3. Do something with the data from the query result" Area --> 
+<div>
+    <button id="download-csv">Download CSV</button> <! -- CSV Button to call csv export function --> 
+    <button id="download-xlsx">Download XLSX</button><! -- Excel Button to call Excel export function --> 
+</div>
