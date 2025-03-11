@@ -1,0 +1,12 @@
+Step 1:
+Install DDX brick form appstore in Domo https://{domain}.domo.com/appstore/details/13C84724BDB6BA1E76B352FE2EBF99E2266F982E982C940B0968FC615CD99338
+Step 2:
+Copy and paste contents from javascript.txt and overwrite code in ddx brick javascript tab in Domo
+Step 3:
+Copy and paste contents from html.txt and overwrite code in ddx brick html tab in Domo
+Step 4:
+Assign Dataset in brick
+Step 5:
+Run brick to test. 
+Step 6:
+Name and Save brick
