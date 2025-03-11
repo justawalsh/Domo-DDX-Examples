@@ -160,34 +160,34 @@ function TableList(tableEl, dataObj, collectionService){
     var $groupRow = $table.find('.group-row');
     var $headerRow = $table.find('.header-row');
 
-    // First row for grouped headers (quarters)
+    // First row for non-grouped headers" section
     $groupRow.append(`<th rowspan="2" scope="col">Field 1</th>`);
     $groupRow.append(`<th rowspan="2" scope="col">Field 2</th>`);
     $groupRow.append(`<th rowspan="2" scope="col">Field 3</th>`);
     $groupRow.append(`<th rowspan="2" scope="col">Field 4</th>`);
 
-    // Group headers for each quarter with 4 columns (US and CA for both allocated and approved)
-    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Q1</th>`);
-    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Q2</th>`);
-    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Q3</th>`);
-    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Q4</th>`);
+    // Fields list for groupings based on the group headers
+    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Group 1</th>`);
+    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Group 2</th>`);
+    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Group 3</th>`);
+    $groupRow.append(`<th colspan="2" scope="col" class="center-text">Group 4</th>`);
 
-    // Second row for individual countries (US and CA) under each quarter
-    // Q1 Fields
-    $headerRow.append(`<th scope="col" data-field="Field_5">Field 5 (Allocated)</th>`);
-    $headerRow.append(`<th scope="col" data-field="Field_6">Field 6 (Approved)</th>`);
+    // Fields list for groupings
+    // Group 1 Fields
+    $headerRow.append(`<th scope="col" data-field="Field_5">Field 5 (additional text)</th>`);
+    $headerRow.append(`<th scope="col" data-field="Field_6">Field 6 (additional text)</th>`);
     
-    // Q2 Fields
-    $headerRow.append(`<th scope="col" data-field="Field_7">Field 7 (Allocated)</th>`);
-    $headerRow.append(`<th scope="col" data-field="Field_8">Field 8 (Approved)</th>`);
+    // Group 2 Fields
+    $headerRow.append(`<th scope="col" data-field="Field_7">Field 7 (additional text)</th>`);
+    $headerRow.append(`<th scope="col" data-field="Field_8">Field 8 (additional text)</th>`);
     
-    // Q3 Fields
-    $headerRow.append(`<th scope="col" data-field="Field_9">Field 9 (Allocated)</th>`);
-    $headerRow.append(`<th scope="col" data-field="Field_10">Field 10 (Approved)</th>`);
+    // Group 3 Fields
+    $headerRow.append(`<th scope="col" data-field="Field_9">Field 9 (additional text)</th>`);
+    $headerRow.append(`<th scope="col" data-field="Field_10">Field 10 (additional text)</th>`);
     
-    // Q4 Fields
-    $headerRow.append(`<th scope="col" data-field="Field_11">Field 11 (Allocated)</th>`);
-    $headerRow.append(`<th scope="col" data-field="Field_12">Field 12 (Approved)</th>`);
+    // Group 4 Fields
+    $headerRow.append(`<th scope="col" data-field="Field_11">Field 11 (additional text)</th>`);
+    $headerRow.append(`<th scope="col" data-field="Field_12">Field 12 (additional text)</th>`);
   }
 
   function buildTableBody(docs){
