@@ -1,0 +1,26 @@
+Bootstrap Datatables (Custom Data Entry Example) - Includes data field grouping headers, add row, export to csv, sync to appdb document.
+
+Step 1:
+Install "Form and Dataset Brick" DDX brick form appstore in Domo https://{domain}.domo.com/appstore/details/FD147AD1D0B76ECD3E4E0ED581D67E408BF7A526922CA5860511AE25CE6DDFB1
+Step 2:
+Copy and paste contents from javascript.txt and overwrite code in ddx brick javascript tab in Domo
+Step 3:
+Copy and paste contents from html.txt and overwrite code in ddx brick html tab in Domo
+Step 4:
+Bottom left of DDX brick, select the collections icon, adjust "app permissions" to desired settings.
+
+Set up table schema:
+Step 1:
+In javascript code, under the "dataObject" section, assign names of fields/columns.
+Step 2:
+In Javascript code, assign non-grouped fields in "// First row for non-grouped headers" section.
+Step 3:
+In Javascript code, assign grouped fields in " // Group headers for grouped headers with 2 columns"
+Step 4:
+In Javascript code, assign fields to groupings in " // Fields list for groupings based on the group headers."
+Step 8:
+Run brick to test
+Step 9:
+Add blank row to table, sync and test again.
+Step 9:
+Name DDX Brick and Save.
