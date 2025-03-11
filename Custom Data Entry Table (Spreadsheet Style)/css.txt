@@ -1,0 +1,109 @@
+#myDiv {
+  padding: 3% 2%;
+  font-family: 'Open Sans';
+}
+#mainHeader {
+    background-color: blue;
+    padding: 20px;
+    color: white;
+    font-size: 36px; /* Large text */
+    font-weight: bold;
+    text-align: left;
+    margin-bottom: 20px; /* Adds space below the header */
+}
+/* Table Styles */
+#tableList {
+  margin-top: 30px;
+  width: 100%; /* Ensures the table takes the full width */
+  border-collapse: collapse; /* Ensures borders are not doubled */
+}
+
+#tableList th,
+#tableList td {
+  text-align: center; /* Centers all text in both headers and cells */
+  border: 1px solid black; /* Adds a thin black border around headers and cells */
+  padding: 8px; /* Adds some padding for better readability */
+}
+
+#tableList th {
+  background-color: #f1f1f1; /* Optional: Adds a subtle background to header cells */
+}
+
+#tableList tbody {
+  font-family: 'Roboto Mono', monospace;
+}
+
+#tableList.loading {
+  opacity: 0.5;
+}
+
+#tableList .actions button {
+  margin-right: 8px;
+}
+
+#tableList tr.editing {
+  background-color: rgba(0, 191, 255, 0.2);
+}
+
+/* Editable cell styles */
+#tableList td[contenteditable="true"] {
+  border: 1px solid black; /* Ensures border for editable cells */
+  background-color: #f9f9f9;
+}
+
+#tableList td[contenteditable="true"]:focus {
+  outline: 2px solid #007bff;
+}
+
+/* Button styles */
+#myDiv .btn-primary,
+.modal .btn-primary {
+  background-color: blue;
+  border: true;
+}
+
+#myDiv .btn-primary:hover,
+#myDiv .btn-primary:focus,
+.modal .btn-primary:hover,
+.modal .btn-primary:focus {
+  background-color: red;
+}
+
+#myDiv .btn-primary:active,
+.modal .btn-primary:active {
+  background-color: red;
+  transform: translateY(1px);
+}
+
+/* Text Styles */
+form .field-type,
+thead .data-type {
+  color: #aaa;
+  font-size: 0.8rem;
+  font-weight: normal;
+  margin-left: 2px;
+}
+
+/* Ensure the Sync button is always visible and usable */
+#exportButton,
+#syncButton,
+th.actions,
+td.actions {
+  display: true;
+}
+
+table.isOwner td.actions,
+table.isOwner th.actions {
+  display: table-cell;
+}
+
+/* Added CSS from ddx conversion */
+body {
+  font-family: "Open Sans", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
