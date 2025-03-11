@@ -1,3 +1,5 @@
+Tabulator table with auto column generation, input text column filters, auto column width to data, movable columns, sort, csv and xl
+
 Step 1:
 Install DDX brick form appstore in Domo https://{domain}.domo.com/appstore/details/13C84724BDB6BA1E76B352FE2EBF99E2266F982E982C940B0968FC615CD99338
 Step 2:
