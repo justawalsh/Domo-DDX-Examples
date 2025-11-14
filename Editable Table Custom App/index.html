@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MCC Lead Source Creator Drop Down Selections Admin" />
+  <meta name="author" content="Lenovo Global Marketing" />
+  <title>App / Browser Title</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="app.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="container header-content">
+      <h1>On Page Title</h1>
+      <div class="theme-toggle" aria-label="Toggle dark mode">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round"></path>
+          <path d="M12 2V4M12 20V22M4.93 4.93L6.34 6.34M17.66 17.66L19.07 19.07M2 12H4M20 12H22M6.34 17.66L4.93 19.07M19.07 4.93L17.66 6.34"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="container">
+    <!-- Controls -->
+    <section class="controls">
+      <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search database..." aria-label="Search database" />
+        <button class="search-btn" aria-label="Search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="actions">
+        <button id="add-row" class="btn btn-primary" aria-label="Add new row">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          Add Row
+        </button>
+
+        <button id="save-all" class="btn btn-success" aria-label="Save all changes">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 13L9 17L19 7" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          Save Changes
+        </button>
+
+        <div class="dropdown">
+          <button id="export-btn" class="btn" aria-haspopup="true" aria-expanded="false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15M7 10L12 15M12 15L17 10M12 15V3"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+            Export
+          </button>
+          <div class="dropdown-menu" role="menu" aria-label="Export options">
+            <button class="dropdown-item" data-format="csv">CSV</button>
+            <button class="dropdown-item" data-format="json">JSON</button>
+            <button class="dropdown-item" data-format="excel">Excel</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Table -->
+    <section class="database-view">
+      <div class="table-container">
+        <table id="database-table" class="data-table" aria-label="Database Table">
+          <thead>
+            <tr id="column-headers">
+              <th class="row-actions" aria-hidden="true"></th>
+              <!-- JS dynamically injects columns -->
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- JS dynamically injects rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button class="pagination-btn" id="prev-page" aria-label="Previous page">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <span class="pagination-info" id="pagination-info">
+          Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+        </span>
+        <button class="pagination-btn" id="next-page" aria-label="Next page">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Column Context Menu -->
+  <div id="context-menu" class="context-menu">
+    <button id="insert-left" class="context-item">Insert 1 Column Left</button>
+    <button id="insert-right" class="context-item">Insert 1 Column Right</button>
+    <button id="rename-column" class="context-item">Rename Column</button>
+    <button id="delete-column" class="context-item">Delete Column</button>
+  </div>
+
+  <!-- Row Context Menu -->
+  <div id="row-context-menu" class="context-menu">
+    <button id="insert-row-above" class="context-item">Insert 1 Row Above</button>
+    <button id="insert-row-below" class="context-item">Insert 1 Row Below</button>
+    <button id="delete-this-row" class="context-item">Delete Row</button>
+  </div>
+
+  <!-- Add / Rename Column Modal -->
+  <div id="column-modal" class="modal">
+    <div class="modal-content small-modal">
+      <div class="modal-header">
+        <h3 id="column-modal-title">Add Column</h3>
+        <button id="close-column-modal" class="close-modal" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label for="column-name-input" class="modal-label">Column Name</label>
+        <input type="text" id="column-name-input" class="modal-input" placeholder="Enter column name" />
+      </div>
+      <div class="modal-footer">
+        <button id="cancel-column-modal" class="btn">Cancel</button>
+        <button id="confirm-column-modal" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Popup -->
+  <div id="delete-popup" class="modal" style="display:none;">
+    <div class="popup-content modal-content small-modal">
+      <h3>Confirm Deletion</h3>
+      <p>Are you sure you want to delete this row?</p>
+      <div class="popup-actions modal-footer">
+        <button id="popup-cancel" class="btn">Cancel</button>
+        <button id="popup-confirm" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- JS Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/ryuu.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- Main Script -->
+  <script src="app.js"></script>
+</body>
+</html>
