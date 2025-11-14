@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     metaDocId: null,
     darkMode: localStorage.getItem("darkMode") === "true",
     currentPage: 1,
-    rowsPerPage: 100,
+    rowsPerPage: 10000,
     searchTerm: "",
     deleteRowIndex: null,
   };
