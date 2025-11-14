@@ -3,6 +3,7 @@
  * Proper AppDB updates (no duplicates)
  * Add/Rename Column Modal + Confirm Delete Modal (iframe-safe)
  * Auto-seeds default columns and row when collection is empty
+ * Excel-style multi-cell paste
  * Manual save only
  * Exports + Dark Mode + Toasts
  */
@@ -11,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================================================
   // CONFIG
   // ============================================================
-  const COLLECTION_NAME = "app_table_1"; // Adjust this line to match the name of your AppDB datacollection in your manifest
+  const COLLECTION_NAME = "app_table_1";
   const endpoint = (path = "") =>
     `/domo/datastores/v1/collections/${encodeURIComponent(COLLECTION_NAME)}${path}`;
 
@@ -25,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     metaDocId: null,
     darkMode: localStorage.getItem("darkMode") === "true",
     currentPage: 1,
-    rowsPerPage: 10000, //Increase pagination is desired
+    rowsPerPage: 100,
     searchTerm: "",
     deleteRowIndex: null,
   };
@@ -65,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================================================
   // API HELPERS
   // ============================================================
-  const listDocuments = async () => await domo.get(`${endpoint("/documents")}`); 
+  const listDocuments = async () => await domo.get(`${endpoint("/documents")}?limit=1000`);
   const createDocument = async (doc) => await domo.post(endpoint("/documents"), doc);
   const updateDocument = async (id, doc) =>
     await domo.put(endpoint(`/documents/${encodeURIComponent(id)}`), doc);
@@ -82,39 +83,23 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!docs || docs.length === 0) {
         console.log("Collection empty — seeding starter data...");
         state.columns = ["a", "b", "c", "d"];
-
-        const seedRow = {
-          a: "test",
-          b: "",
-          c: "",
-          d: "",
-          _row_id: "row-1",
-        };
-
-        // Create sample row in AppDB
+        const seedRow = { a: "test", b: "", c: "", d: "", _row_id: "row-1" };
         const createdRow = await createDocument({ content: seedRow });
         seedRow.id = createdRow.id;
         state.data = [seedRow];
         state.rowOrder = ["row-1"];
 
-        // Create meta order document
         const meta = await createDocument({
-          content: {
-            _meta_order: {
-              columns: state.columns,
-              rows: state.rowOrder,
-            },
-          },
+          content: { _meta_order: { columns: state.columns, rows: state.rowOrder } },
         });
-
         state.metaDocId = meta.id;
+
         renderColumnHeaders();
         renderTable();
         showToast("Initialized collection with sample row and columns.", "info");
         return;
       }
 
-      // Load existing docs
       const metaDoc = docs.find((d) => d.content && d.content._meta_order);
       const dataDocs = docs.filter((d) => !d.content._meta_order);
 
@@ -123,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
         state.columns = metaDoc.content._meta_order.columns || [];
         state.rowOrder = metaDoc.content._meta_order.rows || [];
       } else {
-        // Derive if no metadata
         const keys = new Set();
         dataDocs.forEach((d) => Object.keys(d.content).forEach((k) => keys.add(k)));
         state.columns = [...keys].filter((k) => k !== "id");
@@ -151,9 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // ============================================================
   async function saveRow(row) {
     try {
-      if (row.id) {
-        await updateDocument(row.id, { content: row });
-      } else {
+      if (row.id) await updateDocument(row.id, { content: row });
+      else {
         const created = await createDocument({ content: row });
         row.id = created.id;
       }
@@ -170,9 +153,8 @@ document.addEventListener("DOMContentLoaded", () => {
           rows: state.data.map((r) => r._row_id),
         },
       };
-      if (state.metaDocId) {
-        await updateDocument(state.metaDocId, { content: metaContent });
-      } else {
+      if (state.metaDocId) await updateDocument(state.metaDocId, { content: metaContent });
+      else {
         const created = await createDocument({ content: metaContent });
         state.metaDocId = created.id;
       }
@@ -184,18 +166,14 @@ document.addEventListener("DOMContentLoaded", () => {
   async function saveAllRows() {
     if (!state.data.length) return showToast("No data to save", "info");
     showToast("Saving...", "info");
-
-    state.data.forEach((r, i) => {
-      if (!r._row_id) r._row_id = `row-${i + 1}`;
-    });
-
+    state.data.forEach((r, i) => (!r._row_id ? (r._row_id = `row-${i + 1}`) : null));
     for (const row of state.data) await saveRow(row);
     await saveMeta();
     showToast("All data and order updated successfully.", "success");
   }
 
   // ============================================================
-  // TABLE RENDERING
+  // TABLE RENDERING (includes Excel-style paste)
   // ============================================================
   function renderColumnHeaders() {
     const header = elements.columnHeaders;
@@ -218,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const tr = document.createElement("tr");
       tr.dataset.rowId = rowData._row_id;
 
+      // Delete button
       const action = document.createElement("td");
       const del = document.createElement("button");
       del.className = "row-action delete-row";
@@ -232,9 +211,45 @@ document.addEventListener("DOMContentLoaded", () => {
         td.dataset.column = col;
         td.textContent = rowData[col] || "";
 
+        // Save changes on blur
         td.addEventListener("blur", (e) => {
           const idx = state.data.indexOf(rowData);
           if (idx >= 0) state.data[idx][col] = e.target.textContent.trim();
+        });
+
+        // 🟢 Excel-style paste handler
+        td.addEventListener("paste", (e) => {
+          e.preventDefault();
+          const clipboardData = e.clipboardData.getData("text/plain");
+          if (!clipboardData) return;
+
+          const rows = clipboardData
+            .split(/\r?\n/)
+            .map((r) => r.split("\t"))
+            .filter((r) => r.length && r.some((v) => v.trim() !== ""));
+
+          const startRow = rowIndex;
+          const startCol = state.columns.indexOf(col);
+
+          rows.forEach((rValues, rOffset) => {
+            const targetRowIndex = startRow + rOffset;
+            if (targetRowIndex >= state.data.length) {
+              const newRow = {};
+              state.columns.forEach((c) => (newRow[c] = ""));
+              newRow._row_id = `row-${Date.now()}-${rOffset}`;
+              state.data.push(newRow);
+              state.rowOrder.push(newRow._row_id);
+            }
+
+            const targetRow = state.data[targetRowIndex];
+            rValues.forEach((val, cOffset) => {
+              const targetColIndex = startCol + cOffset;
+              const targetCol = state.columns[targetColIndex];
+              if (targetCol) targetRow[targetCol] = val.trim();
+            });
+          });
+
+          renderTable();
         });
 
         tr.appendChild(td);
@@ -277,11 +292,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   elements.deleteCancel.addEventListener("click", closeDeleteModal);
-
   elements.deleteConfirm.addEventListener("click", async () => {
-    if (state.deleteRowIndex !== null) {
-      await deleteRowAt(state.deleteRowIndex);
-    }
+    if (state.deleteRowIndex !== null) await deleteRowAt(state.deleteRowIndex);
     closeDeleteModal();
   });
 
@@ -323,12 +335,10 @@ document.addEventListener("DOMContentLoaded", () => {
     insertRowAt(clickedRowIndex);
     elements.rowMenu.style.display = "none";
   });
-
   document.getElementById("insert-row-below").addEventListener("click", () => {
     insertRowAt(clickedRowIndex + 1);
     elements.rowMenu.style.display = "none";
   });
-
   document.getElementById("delete-this-row").addEventListener("click", () => {
     openDeleteModal(clickedRowIndex);
     elements.rowMenu.style.display = "none";
@@ -375,7 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ============================================================
-  // COLUMN MODAL HANDLERS
+  // COLUMN MODAL
   // ============================================================
   let modalAction = null;
   let modalColumnIndex = null;
@@ -467,9 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rows = data.map((r) =>
       state.columns.map((c) => `"${r[c] || ""}"`).join(",")
     );
-    const blob = new Blob([headers + "\n" + rows.join("\n")], {
-      type: "text/csv",
-    });
+    const blob = new Blob([headers + "\n" + rows.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     downloadFile(url, "export.csv");
   }
@@ -512,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // TOAST + COMMON HELPERS
+  // HELPERS & EVENTS
   // ============================================================
   function showToast(msg, type = "success") {
     const t = document.createElement("div");
@@ -528,9 +536,6 @@ document.addEventListener("DOMContentLoaded", () => {
     elements.rowMenu.style.display = "none";
   });
 
-  // ============================================================
-  // EVENT BINDINGS
-  // ============================================================
   elements.addRowBtn.addEventListener("click", () => insertRowAt(state.data.length));
   elements.saveAllBtn.addEventListener("click", saveAllRows);
 
@@ -574,7 +579,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ============================================================
-  // INITIALIZE
+  // INIT
   // ============================================================
   loadData();
 });
