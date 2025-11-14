@@ -1,0 +1,27 @@
+This is a Domo Pro-Code app that is an editable table.
+You have the ability to:
+  add/insert/edit/remove rows with warning on remove
+  add/insert/rename/remove columns
+  set pagination row limit in code if desired (current set is 10,000 rows per page
+  edit values in rows
+  rename columns
+
+This handles the column order and row order using a collection document containin the row and column order for you.
+
+Set up:
+Create pro-code app (I normally use the "Hello World" template
+Create a collection (if you name the collection to app_table_1, you will not need to update the javascript
+In the new pro-code app, add the collection to the manifest 
+Add a row to the collection as "Default" and set "Sync Enabled" to "Yes"
+Copy and paste the the contents of my index.html to your pro-code index.html
+Copy and paste the the contents of my app.js to your pro-code app.js
+Copy and paste the the contents of my app.css to your pro-code app.css
+Save your pro-code app
+Create a card for your pro-code app
+Add the card to your created collection in "Permissions" area of the collection and give it admin access (or what ever you like.)
+
+You can also now add your editable table to an "App Studio" app.
+
+When you first load your app, it will provide sample columns and rows since the collection is empty. Once you add data to your collection, it will ignore the sample data.
+
+Have fun!
