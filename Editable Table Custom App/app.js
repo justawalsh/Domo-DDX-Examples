@@ -1,4 +1,5 @@
-/* MCC Lead Source Creator Drop Down Selections Admin
+/* Editable Table Pro-Code app
+ * Features:
  * Full CRUD with persistent column + row order
  * Proper AppDB updates (no duplicates)
  * Add/Rename Column Modal + Confirm Delete Modal (iframe-safe)
